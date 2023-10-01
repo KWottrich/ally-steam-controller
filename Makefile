@@ -1,4 +1,3 @@
 # SPDX-License-Identifier: MIT
-userprogs-always-y += ally-steam-controller
-
-userccflags += -I usr/include
+ally-steam-controller: ally-steam-controller.c
+	gcc ally-steam-controller.c -o ally-steam-controller

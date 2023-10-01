@@ -381,7 +381,7 @@ int main(int argc, char **argv)
 	}
 
 	fprintf(stderr, "Open uhid-cdev %s\n", path);
-	fd = open(path, O_RDWR | O_CLOEXEC);
+	fd = open(path, O_RDWR | __O_CLOEXEC);
 	if (fd < 0) {
 		fprintf(stderr, "Cannot open uhid-cdev %s: %m\n", path);
 		return EXIT_FAILURE;
