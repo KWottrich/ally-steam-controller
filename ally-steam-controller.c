@@ -58,15 +58,15 @@ static int create(int fd)
 	struct uhid_event ev;
 
 	memset(&ev, 0, sizeof(ev));
-	ev.type = UHID_CREATE;
-	strcpy((char*)ev.u.create.name, "ally-deck-controller");
-	ev.u.create.rd_data = reportDescriptor;
-	ev.u.create.rd_size = sizeof(reportDescriptor);
-	ev.u.create.bus = BUS_USB;
-	ev.u.create.vendor = VENDOR_ID;
-	ev.u.create.product = PRODUCT_ID;
-	ev.u.create.version = 0;
-	ev.u.create.country = 0;
+	ev.type = UHID_CREATE2;
+	strcpy((char*)ev.u.create2.name, "ally-deck-controller");
+	strcpy((char*)ev.u.create2.rd_data, reportDescriptor);
+	ev.u.create2.rd_size = sizeof(reportDescriptor);
+	ev.u.create2.bus = BUS_USB;
+	ev.u.create2.vendor = VENDOR_ID;
+	ev.u.create2.product = PRODUCT_ID;
+	ev.u.create2.version = 0;
+	ev.u.create2.country = 0;
 
 	return uhid_write(fd, &ev);
 }
