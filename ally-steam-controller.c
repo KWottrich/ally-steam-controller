@@ -18,64 +18,8 @@
 #include <unistd.h>
 #include <linux/uhid.h>
 
-/*
- * HID Report Desciptor
- *
- * INPUT(1)[INPUT]
- *   Field(0)
- *     Physical(GenericDesktop.Pointer)
- *     Application(GenericDesktop.Mouse)
- *     Usage(3)
- *       Button.0001
- *       Button.0002
- *       Button.0003
- *     Logical Minimum(0)
- *     Logical Maximum(1)
- *     Report Size(1)
- *     Report Count(3)
- *     Report Offset(0)
- *     Flags( Variable Absolute )
- *   Field(1)
- *     Physical(GenericDesktop.Pointer)
- *     Application(GenericDesktop.Mouse)
- *     Usage(3)
- *       GenericDesktop.X
- *       GenericDesktop.Y
- *       GenericDesktop.Wheel
- *     Logical Minimum(-128)
- *     Logical Maximum(127)
- *     Report Size(8)
- *     Report Count(3)
- *     Report Offset(8)
- *     Flags( Variable Relative )
- * OUTPUT(2)[OUTPUT]
- *   Field(0)
- *     Application(GenericDesktop.Keyboard)
- *     Usage(3)
- *       LED.NumLock
- *       LED.CapsLock
- *       LED.ScrollLock
- *     Logical Minimum(0)
- *     Logical Maximum(1)
- *     Report Size(1)
- *     Report Count(3)
- *     Report Offset(0)
- *     Flags( Variable Absolute )
- *
- * This is the mapping that we expect:
- *   Button.0001 ---> Key.LeftBtn
- *   Button.0002 ---> Key.RightBtn
- *   Button.0003 ---> Key.MiddleBtn
- *   GenericDesktop.X ---> Relative.X
- *   GenericDesktop.Y ---> Relative.Y
- *   GenericDesktop.Wheel ---> Relative.Wheel
- *   LED.NumLock ---> LED.NumLock
- *   LED.CapsLock ---> LED.CapsLock
- *   LED.ScrollLock ---> LED.ScrollLock
- *
- * This information can be verified by reading /sys/kernel/debug/hid/<dev>/rdesc
- * This file should print the same information as showed above.
- */
+#define VENDOR_ID 0x28de
+#define PRODUCT_ID 0x1205
 
 static unsigned char rdesc[] = {
 	0x05, 0x01,	/* USAGE_PAGE (Generic Desktop) */
@@ -124,6 +68,21 @@ static unsigned char rdesc[] = {
 	0xc0,		/* END_COLLECTION */
 };
 
+static unsigned char reportDescriptor[] = {
+	0x06, 0xFF, 0xFF,  // Usage Page (Vendor Defined 0xFFFF)
+	0x09, 0x01,        // Usage (0x01)
+	0xA1, 0x01,        // Collection (Application)
+	0x15, 0x00,        //   Logical Minimum (0)
+	0x26, 0xFF, 0x00,  //   Logical Maximum (255)
+	0x75, 0x08,        //   Report Size (8)
+	0x95, 0x40,        //   Report Count (64)
+	0x09, 0x01,        //   Usage (0x01)
+	0x81, 0x02,        //   Input (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position)
+	0x09, 0x01,        //   Usage (0x01)
+	0xB1, 0x02,        //   Feature (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
+	0xC0,              // End Collection
+};
+
 static int uhid_write(int fd, const struct uhid_event *ev)
 {
 	ssize_t ret;
@@ -147,12 +106,12 @@ static int create(int fd)
 
 	memset(&ev, 0, sizeof(ev));
 	ev.type = UHID_CREATE;
-	strcpy((char*)ev.u.create.name, "test-uhid-device");
-	ev.u.create.rd_data = rdesc;
-	ev.u.create.rd_size = sizeof(rdesc);
+	strcpy((char*)ev.u.create.name, "ally-deck-controller");
+	ev.u.create.rd_data = reportDescriptor;
+	ev.u.create.rd_size = sizeof(reportDescriptor);
 	ev.u.create.bus = BUS_USB;
-	ev.u.create.vendor = 0x15d9;
-	ev.u.create.product = 0x0a37;
+	ev.u.create.vendor = VENDOR_ID;
+	ev.u.create.product = PRODUCT_ID;
 	ev.u.create.version = 0;
 	ev.u.create.country = 0;
 
